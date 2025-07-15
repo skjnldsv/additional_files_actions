@@ -1,0 +1,56 @@
+{
+  "name": "additional_files_actions",
+  "version": "0.1.0",
+  "description": "Enable optional file actions in Nextcloud Files",
+  "type": "module",
+  "scripts": {
+    "build": "vite --mode production build",
+    "dev": "vite --mode development build",
+    "watch": "vite --mode development build --watch",
+    "check-types": "tsc",
+    "ts:check": "vue-tsc --noEmit"
+  },
+  "browserslist": [
+    "extends @nextcloud/browserslist-config"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/skjnldsv/additional_files_actions.git"
+  },
+  "keywords": [
+    "files",
+    "nextcloud",
+    "actions"
+  ],
+  "author": "skjnldsv",
+  "license": "AGPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/skjnldsv/additional_files_actions/issues"
+  },
+  "homepage": "https://github.com/skjnldsv/additional_files_actions#readme",
+  "devDependencies": {
+    "@nextcloud/browserslist-config": "^3.0.1",
+    "@nextcloud/vite-config": "^2.3.5",
+    "@vue/tsconfig": "^0.7.0",
+    "tsc": "^2.0.4",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vue-tsc": "^3.0.1"
+  },
+  "dependencies": {
+    "@mdi/svg": "^7.4.47",
+    "@nextcloud/axios": "^2.5.1",
+    "@nextcloud/dialogs": "^7.0.0-rc.0",
+    "@nextcloud/files": "^3.11.0",
+    "@nextcloud/initial-state": "^2.2.0",
+    "@nextcloud/l10n": "^3.4.0",
+    "@nextcloud/router": "^3.0.1",
+    "@nextcloud/vue": "^9.0.0-rc.3",
+    "vue": "^3.5.17",
+    "vue-material-design-icons": "^5.3.1"
+  },
+  "engines": {
+    "node": "^22.0.0",
+    "npm": "^10.0.0"
+  }
+}

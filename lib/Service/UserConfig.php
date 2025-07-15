@@ -1,0 +1,135 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * SPDX-FileCopyrightText: 2025 Nextcloud GmbH and Nextcloud contributors
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ */
+namespace OCA\AdditionalFilesActions\Service;
+
+use OCA\AdditionalFilesActions\AppInfo\Application;
+use OCP\IConfig;
+use OCP\IUser;
+use OCP\IUserSession;
+
+class UserConfig {
+	protected ?IUser $user = null;
+
+	/**
+	 * List of allowed user config keys, their default values and allowed values
+	 * This is used to validate user input when setting configs
+	 */
+	public const ALLOWED_CONFIGS = [
+		[
+			// Whether to show an additional "copy file internal link" action inline
+			'key' => 'show_copy_file_internal_link',
+			'default' => false,
+			'allowed' => [true, false],
+		],
+
+		[
+			// Whether to show folder descriptions inline
+			'key' => 'show_folder_description_inline',
+			'default' => false,
+			'allowed' => [true, false],
+		],
+	];
+
+	public function __construct(
+		protected IConfig $config,
+		IUserSession $userSession,
+	) {
+		$this->user = $userSession->getUser();
+	}
+
+	/**
+	 * Get the list of all allowed user config keys
+	 * @return string[]
+	 */
+	private function getAllowedConfigKeys(): array {
+		return array_map(function ($config) {
+			return $config['key'];
+		}, self::ALLOWED_CONFIGS);
+	}
+
+	/**
+	 * Get the list of allowed config values for a given key
+	 *
+	 * @param string $key a valid config key
+	 * @return array
+	 */
+	private function getAllowedConfigValues(string $key): array {
+		foreach (self::ALLOWED_CONFIGS as $config) {
+			if ($config['key'] === $key) {
+				return $config['allowed'];
+			}
+		}
+		return [];
+	}
+
+	/**
+	 * Get the default config value for a given key
+	 *
+	 * @param string $key a valid config key
+	 * @return string|bool
+	 */
+	private function getDefaultConfigValue(string $key) {
+		foreach (self::ALLOWED_CONFIGS as $config) {
+			if ($config['key'] === $key) {
+				return $config['default'];
+			}
+		}
+		return '';
+	}
+
+	/**
+	 * Set a user config
+	 *
+	 * @param string $key
+	 * @param string|bool $value
+	 * @throws \Exception
+	 * @throws \InvalidArgumentException
+	 */
+	public function setConfig(string $key, $value): void {
+		if ($this->user === null) {
+			throw new \Exception('No user logged in');
+		}
+
+		if (!in_array($key, $this->getAllowedConfigKeys())) {
+			throw new \InvalidArgumentException('Unknown config key');
+		}
+
+		if (!in_array($value, $this->getAllowedConfigValues($key))) {
+			throw new \InvalidArgumentException('Invalid config value');
+		}
+
+		if (is_bool($value)) {
+			$value = $value ? '1' : '0';
+		}
+
+		$this->config->setUserValue($this->user->getUID(), Application::APP_ID, $key, $value);
+	}
+
+	/**
+	 * Get the current user configs array
+	 *
+	 * @return array
+	 */
+	public function getConfigs(): array {
+		if ($this->user === null) {
+			throw new \Exception('No user logged in');
+		}
+
+		$userId = $this->user->getUID();
+		$userConfigs = array_map(function (string $key) use ($userId) {
+			$value = $this->config->getUserValue($userId, Application::APP_ID, $key, $this->getDefaultConfigValue($key));
+			// If the default is expected to be a boolean, we need to cast the value
+			if (is_bool($this->getDefaultConfigValue($key)) && is_string($value)) {
+				return $value === '1';
+			}
+			return $value;
+		}, $this->getAllowedConfigKeys());
+
+		return array_combine($this->getAllowedConfigKeys(), $userConfigs);
+	}
+}
